@@ -1,0 +1,7 @@
+/node_modules
+/links
+/mp3
+/text
+/db
+/lib
+*.log

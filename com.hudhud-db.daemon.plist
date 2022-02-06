@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+    <dict>
+
+        <key>Label</key>
+        <string>com.hudhud-db.daemon.plist</string>
+
+        <key>RunAtLoad</key>
+        <true/>
+
+        <key>StartInterval</key>
+        <integer>1600</integer>
+
+        <key>StandardErrorPath</key>
+        <string>/Users/aymana/Documents/projects/elephant/db-err.log</string>
+
+        <key>StandardOutPath</key>
+        <string>/Users/aymana/Documents/projects/elephant/db-out.log</string>
+
+        <key>EnvironmentVariables</key>
+        <dict>
+            <key>PATH</key>
+            <string><![CDATA[/usr/local/bin:/usr/local/sbin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/homebrew/bin]]></string>
+        </dict>
+
+        <key>WorkingDirectory</key>
+        <string>/Users/aymana/Documents/projects/elephant</string>
+
+        <key>ProgramArguments</key>
+        <array>
+            <string>/usr/local/bin/node</string>
+            <string>.</string>
+            <string>db</string>
+        </array>
+
+    </dict>
+</plist>
