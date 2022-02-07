@@ -56,8 +56,8 @@ async function prepare() {
             specs.repeat = arg.split("=")[1]
         }
     });
-    if (originalSpecs === JSON.stringify(specs)){
-        return ;
+    if (originalSpecs === JSON.stringify(specs)) {
+        return;
     }
     fs.writeFileSync('./specs.json', JSON.stringify(specs));
 }
@@ -119,12 +119,14 @@ async function getLinks() {
             }
         }
         videos.forEach(video => {
-            fs.writeFileSync('./links/' + video?.snippet?.position + "_" + video.snippet.resourceId.videoId + ".yt", JSON.stringify(video, null, 2))
+            const fileName = './links/' + video?.snippet?.position + "_" + video.snippet.resourceId.videoId + ".yt";
+            fs.writeFileSync(fileName, JSON.stringify(video, null, 2))
+            console.log(fileName);
         })
     }
 }
 
-async function listDuration() {
+async function listDuration(direction = 'asc') {
     const output = [];
     let links = fs.readdirSync('./links');
     for (const link of links) {
@@ -132,8 +134,13 @@ async function listDuration() {
         const data = JSON.parse(content);
         output.push({ url: data.url, seconds: data.duration.seconds });
     }
-    const sortedLinks = output.sort((a, b) => a.seconds > b.seconds ? 1 : -1)
-    console.log('%cMyProject%cline:120%coutput', 'color:#fff;background:#ee6f57;padding:3px;border-radius:2px', 'color:#fff;background:#1f3c88;padding:3px;border-radius:2px', 'color:#fff;background:rgb(251, 178, 23);padding:3px;border-radius:2px', sortedLinks)
+    let sortedLinks;
+    if (direction === 'desc') {
+        sortedLinks = output.sort((a, b) => a.seconds > b.seconds ? -1 : 1)
+    } else {
+        sortedLinks = output.sort((a, b) => a.seconds > b.seconds ? 1 : -1)
+    }
+    console.log('Channel videos', sortedLinks)
 }
 
 async function downloadAudio() {
@@ -201,6 +208,7 @@ async function transcribeWithAnthiago() {
     let videoId;
     let videoFile;
 
+    // Transcribe specific file (used by spawn command below)
     process.argv.forEach(arg => {
         if (arg.startsWith("link=")) {
             videoId = arg.split("=")[1]
@@ -280,11 +288,14 @@ async function save() {
     if (!specs.ALGOLIA_API_KEY) {
         return console.error("Algolia api key is missing is missing\n", usage)
     }
+    //ZxEOQACxiFs
     const client = algoliaSearch('97IMN3NK2B', specs.ALGOLIA_API_KEY);
     const index = client.initIndex('speech');
 
     let textIds = fs.readdirSync('./text').filter(f => f.endsWith('.html')).filter(a => a).map(f => f.split('.')[0]);
     let dbIds = fs.readdirSync('./db').map(f => f.split('.')[0]);
+    // uncomment this line to process a specific text file to db
+    // const remainingIds = ['ZxEOQACxiFs'];
     const remainingIds = textIds.filter(text => !dbIds.includes(text)).filter(a => a);
     if (!remainingIds || remainingIds.length == 0) {
         return console.warn('No more text available to push to db. Total db files: ', dbIds.length)
@@ -309,31 +320,32 @@ async function save() {
         }
 
         const videoLinkFile = JSON.parse(fs.readFileSync('./links/' + linkFile[0], 'utf-8'));
-        let text =  ''; // data;
+        let text = ''; // data;
         try {
-            const image = (videoLinkFile.snippet.thumbnails.standard || videoLinkFile.snippet.thumbnails.default ).url;
+            const image = (videoLinkFile.snippet.thumbnails.standard || videoLinkFile.snippet.thumbnails.default).url;
             const url = videoLinkFile.url;
             const title = videoLinkFile.title + '\n == \n' + videoLinkFile.snippet.description;
-            const sanitizedData = data?.replace(/\s/g,' ')?.replace(/<a.*?>/g, '').replace(/<\/a>/g,'');
-            const description = sanitizedData?.substring(0,102400);
-            if (sanitizedData.length > 102400){
-                text = sanitizedData.substring(102400);
+            const sanitizedData = data?.replace(/\s/g, ' ')?.replace(/<a.*?>/g, '').replace(/<\/a>/g, '');
+            const maximumRecordLength = 40000;
+            let i = 0;
+            while (sanitizedData.length >= i * maximumRecordLength ) {
+                i++;
+                const description = sanitizedData?.substring(i * maximumRecordLength, (i * maximumRecordLength) + maximumRecordLength);
+                const saveObject =
+                {
+                    text,
+                    url,
+                    image,
+                    title,
+                    description
+                }
+
+                const result = await index.saveObjects([saveObject], { autoGenerateObjectIDIfNotExist: true });
+                fs.writeFileSync('./db/' + videoId, JSON.stringify({ ...saveObject, objectIDs: result.objectIDs }))
+                console.log('saved to db: ', videoId, 'total db: ', fs.readdirSync('./db').length)
             }
-            // console.log(description.length);
-            const saveObject =
-            {
-                text,
-                url,
-                image,
-                title,
-                description
-            }
-    
-            const result = await index.saveObjects([saveObject], { autoGenerateObjectIDIfNotExist: true });
-            fs.writeFileSync('./db/' + videoId, JSON.stringify({ ...saveObject, objectIDs: result.objectIDs }))
-            console.log('saved to db: ', videoId, 'total db: ', fs.readdirSync('./db').length)
         } catch (err) {
-            console.log(videoId,err)
+            console.log(videoId, err)
         }
     }
 }
@@ -474,27 +486,23 @@ function convert_time(duration, inSeconds = false) {
 
 async function main() {
     await prepare();
-    // if (process.argv.includes("links")) {
-    //     return getLinks();
-    // }
-    // if (process.argv.includes("duration")) {
-    //     return listDuration();
-    // }
+
+    if (process.argv.includes("anthiago")) {
+        try {
+            transcribeWithAnthiago();
+        } catch (err) {
+            console.log(err)
+        }
+
+        return;
+    }
+
+
     // if (process.argv.includes("audio")) {
     //     return downloadAudio();
     // }
     // if (process.argv.includes("text")) {
     //     return transcribe();
-    // }
-    // if (process.argv.includes("anthiago")) {
-    //     try {
-    //         transcribeWithAnthiago();
-    //     } catch (err) {
-    //         console.log(err)
-    //     }
-    // }
-    // if (process.argv.includes("db")) {
-    //     save();
     // }
     // if (process.argv.includes("clean")) {
     //     clean();
@@ -504,17 +512,38 @@ async function main() {
     // }
 
     inquirer
-  .prompt([
-    {
-      type: 'list',
-      name: 'action',
-      message: `Select an action for channel ${specs.channelId}`,
-      choices: ['Download all video urls to ./links', 'List all videos with durations', 'Download all remaining audio files', 'Transcribe', 'save to db'],
-    },
-  ])
-  .then(answers => {
-    console.info('Action:', answers.action);
-  });
+        .prompt([
+            {
+                type: 'list',
+                name: 'action',
+                message: `Select an action for channel ${specs.channelId}`,
+                choices: ['1-Get all channel video information to ./links folder', '2-Display channel video durations sorted ascending', '3-Display channel video durations sorted descending', '4-Transcribe all remaining videos using anthiago (multi threaded [max=10])', '5-Save all unsaved transcriptions to algolia'],
+            },
+        ])
+        .then(answers => {
+            if (answers.action.startsWith('1-')) {
+                return getLinks();
+            }
+            if (answers.action.startsWith('2-')) {
+                return listDuration();
+            }
+            if (answers.action.startsWith('3-')) {
+                return listDuration('desc');
+            }
+            if (answers.action.startsWith('4-')) {
+                try {
+                    return transcribeWithAnthiago();
+                } catch (err) {
+                    return console.log(err)
+                }
+            }
+            if (answers.action.startsWith('5-')) {
+                return save();
+            }
+
+
+
+        });
 
 }
 
