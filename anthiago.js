@@ -4,13 +4,8 @@ let page;
 let browser;
 async function initPage(onContentLoaded) {
   browser = await puppeteer.launch({
-    headless: true,
+    headless: false,
     defaultViewport: null,
-    args: [
-      "--incognito",
-      "--disable-web-security",
-      "--disable-features=IsolateOrigins,site-per-process",
-    ],
   });
   const pages = await browser.pages();
   page = pages[0];

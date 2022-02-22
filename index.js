@@ -328,7 +328,7 @@ async function save() {
             const sanitizedData = data?.replace(/\s/g, ' ')?.replace(/<a.*?>/g, '').replace(/<\/a>/g, '');
             const maximumRecordLength = 40000;
             let i = 0;
-            while (sanitizedData.length >= i * maximumRecordLength ) {
+            while (sanitizedData.length >= i * maximumRecordLength) {
                 i++;
                 const description = sanitizedData?.substring(i * maximumRecordLength, (i * maximumRecordLength) + maximumRecordLength);
                 const saveObject =
@@ -348,6 +348,53 @@ async function save() {
             console.log(videoId, err)
         }
     }
+}
+
+async function addComment() {
+    let videoId;
+    let videoFile;
+
+    if (!allLinkFiles) {
+        allLinkFiles = fs.readdirSync('./links');
+    }
+
+    if (!videoId) {
+        const textMap = {};
+        const commentFiles = (fs.existsSync('./comments') && fs.readdirSync('./comments')) || [];
+        for (const commentFile of commentFiles) {
+            textMap[commentFile.split('.')[0]] = commentFile;
+        }
+        if (Object.keys(linkMap).length === 0) {
+            for (const linkFile of allLinkFiles) {
+                linkMap[linkFile.match(/\d+_(.*)\.yt/)[1]] = linkFile;
+            }
+        }
+
+        let i = 0;
+        for (const link of Object.keys(linkMap)) {
+            if (!textMap[link]) {
+                videoFile = linkMap[link]
+                videoId = link
+                if (i < 1) {
+                    openForComment(videoFile);
+                }
+                i++;
+            }
+        }
+    }
+}
+
+async function openForComment(videoFile) {
+    // Read file to get url
+    const linkContent = JSON.parse(fs.readFileSync('./links/' + videoFile, 'utf-8'));
+    const url = linkContent.url;
+    const page = await anthiago.initPage(async (res) => {
+        //TODO: Type in comment
+        // await page.type('#url_input', url)
+    })
+    await page.goto(
+        url
+        , { waitUntil: "domcontentloaded" });
 }
 
 async function clean() {
@@ -511,13 +558,17 @@ async function main() {
     //     exportLinks();
     // }
 
+    const links = fs.readdirSync('./links')?.length;
+    const remaining = links - fs.readdirSync('./text')?.length;
+    const unsaved = remaining - fs.readdirSync('./db')?.length;
+    const remainingComments = links - (fs.existsSync('./comments') && fs.readdirSync('./comments')?.length);
     inquirer
         .prompt([
             {
                 type: 'list',
                 name: 'action',
                 message: `Select an action for channel ${specs.channelId}`,
-                choices: ['1-Get all channel video information to ./links folder', '2-Display channel video durations sorted ascending', '3-Display channel video durations sorted descending', '4-Transcribe all remaining videos using anthiago (multi threaded [max=10])', '5-Save all unsaved transcriptions to algolia'],
+                choices: [`1-Get video links => ./links ${links} files`, `2-Display ${links} links duration sorted ASC`, `3-Display ${links} links duration sorted DESC`, `4-Transcribe ${remaining > 0 ? remaining : '0'} remaining videos using anthiago (multi threaded [max=10])`, `5-Save ${unsaved > 0 ? unsaved : '0'} unsaved transcriptions to algolia`, `6- Add comment ${remainingComments} remaining `],
             },
         ])
         .then(answers => {
@@ -539,6 +590,9 @@ async function main() {
             }
             if (answers.action.startsWith('5-')) {
                 return save();
+            }
+            if (answers.action.startsWith('6-')) {
+                return addComment();
             }
 
 
