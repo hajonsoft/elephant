@@ -1,27 +1,21 @@
 # Getting started
 
-Here is a demo login with alialiayman@gmail.com
+brew install ffmpeg
+pnpm i
+
+
+Demo login with alialiayman@gmail.com
 
 [Search Ahmed Subhi Mansour](www.algolia.com/interface-demos/ca4f4aab-d3a1-4c61-a74d-c1716724795b)
 
 ![image](https://user-images.githubusercontent.com/9623964/144528747-b3f2e257-c24b-47a6-a8c4-1782e739976d.png)
 
 
-
-Make sure the machine that will download and transcribe the videos has ffmpeg and youtube downloader.
-
-```
-brew install ffmpeg
-
-```
-
-
-The basic commands are 
-
+# Commands
 
 ```
 node . links channel=CHANNELID gkey=APIKEY
-_will get all video links for a given channel_
+_get all video links for a given channel_
 
 node . links channel=UC4rHVwTcnphaetXGQu47nxg gkey=AIzaSyAk0R8OXbsQpnl8ARgzoOres4--6KeAbAo
 
@@ -40,7 +34,6 @@ _will clean audio, text and db folders and remove orphans or erronious transcrip
 
 ```
 
-
 # Google API KEY
 You must have a [GOOGLE_API_KEY](https://developers.google.com/maps/documentation/maps-static/get-api-key).
 
@@ -49,7 +42,7 @@ I created a map key first and then got an error then had to enable youtube
 
 https://console.cloud.google.com/google/maps-apis/credentials?project=jawad-333216
 
-here is yourtube
+here is youtube
 https://console.cloud.google.com/apis/api/youtube.googleapis.com/overview?project=jawad-333216
 
 ## Watson

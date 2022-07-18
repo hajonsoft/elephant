@@ -20,6 +20,7 @@
     "googleapis": "^91.0.0",
     "ibm-watson": "^6.2.1",
     "inquirer": "^8.2.0",
+    "puppeteer": "^15.4.0",
     "puppeteer-extra": "^3.2.3",
     "watson-developer-cloud": "^2.40.0"
   }
