@@ -238,15 +238,13 @@ async function transcribe() {
   const videoId = audioFiles?.[0];
   const stats = fs.statSync(`./mp3/${videoId}.flac`);
   const fileSize = `${Math.round(stats.size / (1024 * 1024), 1)} MB`;
-  const curl = `curl -X POST -u "apikey:${
-    specs.WATSON_API_KEY
-  }" -o "${path.join(
-    __dirname,
-    "text",
-    videoId + ".json"
-  )}" --header "Content-Type: audio/flac" --data-binary @"./mp3/${videoId}.flac" "${
-    specs.WATSON_URL
-  }/v1/recognize?model=ar-MS_BroadbandModel"`;
+  const curl = `curl -X POST -u "apikey:${specs.WATSON_API_KEY
+    }" -o "${path.join(
+      __dirname,
+      "text",
+      videoId + ".json"
+    )}" --header "Content-Type: audio/flac" --data-binary @"./mp3/${videoId}.flac" "${specs.WATSON_URL
+    }/v1/recognize?model=ar-MS_BroadbandModel"`;
   console.log(
     "TRANSCRIBE videoId: ",
     colors.TP_ANSI_BG_BLUE,
@@ -516,25 +514,23 @@ async function addComment() {
   }
 }
 
+const liked = [];
 async function getLikes() {
-  let videoId;
-  let videoFile;
+  let nextPageToken = "";
+  const url = "https://www.googleapis.com/youtube/v3/videos?part=snippet&myRating=like&maxResults=20";
 
-  if (!allLinkFiles) {
-    allLinkFiles = fs.readdirSync("./links");
-  }
-
-  let videoJSON = {};
-  if (!videoId) {
-    for (const linkFile of allLinkFiles) {
-      videoJSON = JSON.parse(fs.readFileSync("./links/" + linkFile, "utf-8"));
-      if (videoJSON.liked) {
-        continue;
-      }
-      setLiked(videoJSON);
-      break;
+  const response = await axios.get(url, {
+    headers: {
+      'Authorization': `Bearer ${specs.YOUTUBE_AUTH_TOKEN}`,
+      'pageToken': nextPageToken,
     }
+  });
+  console.log('%cMyProject%cline:522%cresponse', 'color:#fff;background:#ee6f57;padding:3px;border-radius:2px', 'color:#fff;background:#1f3c88;padding:3px;border-radius:2px', 'color:#fff;background:rgb(248, 147, 29);padding:3px;border-radius:2px', response)
+  nextPageToken = response.data.nextPageToken;
+  response.data.items.forEach(item => {
+    liked.push(item.id);
   }
+  );
 }
 
 async function setLiked(inputJSON) {
@@ -800,11 +796,9 @@ async function main() {
           `1-Get video links => ./links ${links} files`,
           `2-Display ${links} links duration sorted ASC`,
           `3-Display ${links} links duration sorted DESC`,
-          `4-Transcribe ${
-            remaining > 0 ? remaining : "0"
+          `4-Transcribe ${remaining > 0 ? remaining : "0"
           } remaining videos using anthiago (multi threaded [max=10])`,
-          `5-Save ${
-            unsaved > 0 ? unsaved : "0"
+          `5-Save ${unsaved > 0 ? unsaved : "0"
           } unsaved transcriptions to algolia`,
           `6- Add comment ${remainingComments} remaining `,
           `7- Get like ${remainingLikes} remaining `,
@@ -837,6 +831,7 @@ async function main() {
       if (answers.action.startsWith("7-")) {
         return getLikes();
       }
+
     });
 }
 
