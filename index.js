@@ -1,4 +1,5 @@
 import { google } from 'googleapis';
+import open from 'open';
 import fs from 'fs';
 import path from 'path';
 import algoliaSearch from 'algoliasearch';
@@ -674,6 +675,29 @@ async function exportLinks() {
   }
 }
 
+async function playVideo() {
+  let watched = {};
+  if (fs.existsSync("./watched.json")) {
+    const watchedData = fs.readFileSync("./watched.json", "utf-8");
+    watched =  JSON.parse(watchedData);
+  }
+
+  if (fs.existsSync('./notliked.json')) {
+    const notLiked = JSON.parse(fs.readFileSync('./notliked.json', 'utf-8'));
+    for (const item of notLiked) {
+      if (!watched[item.videoId]) {
+        watched[item.videoId] = true;
+        fs.writeFileSync('./watched.json', JSON.stringify(watched));
+        const url = item.url;
+        open(url);
+        return;
+      }
+    }
+
+  }
+}
+
+
 function convert_time(duration, inSeconds = false) {
   var a = duration.match(/\d+/g);
 
@@ -775,7 +799,7 @@ async function main() {
           `5-Save ${unsaved > 0 ? unsaved : "0"
           } unsaved transcriptions to algolia`,
           `6- Add comment ${remainingComments} remaining `,
-          `7- Get like ${remainingLikes} remaining `,
+          `7- Play a video`,
         ],
       },
     ])
@@ -803,7 +827,7 @@ async function main() {
         return addComment();
       }
       if (answers.action.startsWith("7-")) {
-        return getLikes();
+        return playVideo();
       }
 
     });

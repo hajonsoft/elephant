@@ -42,16 +42,19 @@ for (const link of links) {
         video.liked = false;
         notLiked.push({
             url: video.url,
+            videoId: video.videoId,
             duration: video.duration.formatted,
+            position: video.snippet.position,
             title: video.title,
             description: video.snippet.description,
-            date: video.date,
+            date: moment(video.date).format('dddd YYYY-MM-DD hh:mm:ss a'),
+            since: moment(video.date).fromNow(),
         })
     }
 }
 
 const sorted = notLiked.sort((a, b) => {
-    return moment(a.date).diff(moment(b.date));
-});
+    return a.position - b.position;
+}).reverse();
 fs.writeFileSync('./notLiked.json', JSON.stringify(sorted));
 console.log('Total videos not yet liked (i.e watched)', sorted.length);
