@@ -1,16 +1,12 @@
-const { google } = require("googleapis");
-const fs = require("fs");
-const path = require("path");
-const algoliaSearch = require("algoliasearch");
-const colors = require("./colors");
-const axios = require("axios");
-const inquirer = require("inquirer");
-var audio = require("./audio");
-var anthiago = require("./anthiago");
-const { exec } = require("child_process");
-const dayjs = require("dayjs");
-var spawn = require("child_process").spawn;
-const puppeteer = require("puppeteer");
+import { google } from 'googleapis';
+import fs from 'fs';
+import path from 'path';
+import algoliaSearch from 'algoliasearch';
+import axios from 'axios';
+import inquirer from 'inquirer';
+import { exec } from 'child_process';
+import dayjs from 'dayjs';
+import puppeteer from 'puppeteer';
 
 let allLinkFiles;
 let linkMap = {};
@@ -84,13 +80,9 @@ async function getLinks() {
   for (const channel of res.data.items) {
     console.log(
       "Channel Name:",
-      colors.TP_ANSI_INVERSE_ON,
       channel.snippet.title.trim(),
-      colors.TP_ANSI_RESET,
       "videos: ",
-      colors.TP_ANSI_INVERSE_ON,
       channel.statistics.videoCount,
-      colors.TP_ANSI_RESET
     );
     playlistId = channel.contentDetails.relatedPlaylists.uploads;
   }
@@ -168,48 +160,42 @@ async function listDuration(direction = "asc") {
   console.log("Channel videos", sortedLinks);
 }
 
-async function downloadAudio() {
-  let links = fs.readdirSync("./links");
-  let audios = fs
-    .readdirSync("./mp3")
-    .map((f) => f.match(/(.*?)\.flac/)?.[1])
-    .filter((z) => z);
-  links = links
-    .filter((f) => !audios.includes(f.match(/_(.*?)\.json/)[1]))
-    .sort((a, b) => parseInt(a.split("_")[0]) - parseInt(b.split("_")[0]));
-  if (!links || links.length === 0) {
-    return console.warn("All links have been downloaded. no more links");
-  }
-  for (let i = 0; i < (specs.repeat || 1); i++) {
-    const meta = links[i].match(/_(.*?)\.json/);
-    if (meta.length >= 2) {
-      const videoId = meta[1];
-      console.log(
-        "DOWNLOAD videoId: ",
-        colors.TP_ANSI_INVERSE_ON,
-        links[i],
-        colors.TP_ANSI_RESET,
-        "Position: ",
-        colors.TP_ANSI_INVERSE_ON,
-        links[i].split("_")[0],
-        colors.TP_ANSI_RESET,
-        "available links=",
-        links.length,
-        " flac audio=",
-        audios.length,
-        " available links - flac audio =",
-        links.length - audios.length
-      );
-      audio.getYouTubeAudio(videoId).then(function () {
-        console.log(
-          colors.TP_ANSI_FG_GREEN,
-          `Downloaded ${videoId},  Completed: ${audios.length}`,
-          colors.TP_ANSI_RESET
-        );
-      });
-    }
-  }
-}
+// async function downloadAudio() {
+//   let links = fs.readdirSync("./links");
+//   let audios = fs
+//     .readdirSync("./mp3")
+//     .map((f) => f.match(/(.*?)\.flac/)?.[1])
+//     .filter((z) => z);
+//   links = links
+//     .filter((f) => !audios.includes(f.match(/_(.*?)\.json/)[1]))
+//     .sort((a, b) => parseInt(a.split("_")[0]) - parseInt(b.split("_")[0]));
+//   if (!links || links.length === 0) {
+//     return console.warn("All links have been downloaded. no more links");
+//   }
+//   for (let i = 0; i < (specs.repeat || 1); i++) {
+//     const meta = links[i].match(/_(.*?)\.json/);
+//     if (meta.length >= 2) {
+//       const videoId = meta[1];
+//       console.log(
+//         "DOWNLOAD videoId: ",
+//         links[i],
+//         "Position: ",
+//         links[i].split("_")[0],
+//         "available links=",
+//         links.length,
+//         " flac audio=",
+//         audios.length,
+//         " available links - flac audio =",
+//         links.length - audios.length
+//       );
+//       audio.getYouTubeAudio(videoId).then(function () {
+//         console.log(
+//           `Downloaded ${videoId},  Completed: ${audios.length}`,
+//         );
+//       });
+//     }
+//   }
+// }
 
 async function transcribe() {
   if (!specs.WATSON_API_KEY) {
@@ -247,14 +233,8 @@ async function transcribe() {
     }/v1/recognize?model=ar-MS_BroadbandModel"`;
   console.log(
     "TRANSCRIBE videoId: ",
-    colors.TP_ANSI_BG_BLUE,
-    colors.TP_ANSI_FG_YELLOW,
     videoId,
-    colors.TP_ANSI_RESET,
-    colors.TP_ANSI_FG_BLUE,
-    colors.TP_ANSI_FG_YELLOW,
     fileSize,
-    colors.TP_ANSI_RESET,
     "completed: ",
     textIds.length,
     "\n------------------------\n",
@@ -277,103 +257,97 @@ async function transcribe() {
   });
 }
 
-async function transcribeWithAnthiago() {
-  const currentTime = dayjs();
-  let videoId;
-  let videoFile;
+// async function transcribeWithAnthiago() {
+//   const currentTime = dayjs();
+//   let videoId;
+//   let videoFile;
 
-  // Transcribe specific file (used by spawn command below)
-  process.argv.forEach((arg) => {
-    if (arg.startsWith("link=")) {
-      videoId = arg.split("=")[1];
-    }
-  });
-  if (!allLinkFiles) {
-    allLinkFiles = fs.readdirSync("./links");
-  }
+//   // Transcribe specific file (used by spawn command below)
+//   process.argv.forEach((arg) => {
+//     if (arg.startsWith("link=")) {
+//       videoId = arg.split("=")[1];
+//     }
+//   });
+//   if (!allLinkFiles) {
+//     allLinkFiles = fs.readdirSync("./links");
+//   }
 
-  if (!videoId) {
-    const textMap = {};
-    const allTextFiles = fs.readdirSync("./text"); // .filter(f => f.endsWith('.html'))
-    console.log("Completed: ", allTextFiles.length);
+//   if (!videoId) {
+//     const textMap = {};
+//     const allTextFiles = fs.readdirSync("./text"); // .filter(f => f.endsWith('.html'))
+//     console.log("Completed: ", allTextFiles.length);
 
-    for (const textFile of allTextFiles) {
-      textMap[textFile.split(".")[0]] = textFile;
-    }
-    if (Object.keys(linkMap).length === 0) {
-      for (const linkFile of allLinkFiles) {
-        linkMap[linkFile.match(/\d+_(.*)\.json/)[1]] = linkFile;
-      }
-    }
+//     for (const textFile of allTextFiles) {
+//       textMap[textFile.split(".")[0]] = textFile;
+//     }
+//     if (Object.keys(linkMap).length === 0) {
+//       for (const linkFile of allLinkFiles) {
+//         linkMap[linkFile.match(/\d+_(.*)\.json/)[1]] = linkFile;
+//       }
+//     }
 
-    let i = 0;
-    for (const link of Object.keys(linkMap)) {
-      if (!textMap[link]) {
-        videoFile = linkMap[link];
-        videoId = link;
-        if (i < 10) {
-          console.log("spawn for ", link);
-          spawn("node", [".", "anthiago", "link=" + link]);
-        }
-        // console.log(colors.TP_ANSI_FG_BLUE, `node . anthiago link=${link} &`, colors.TP_ANSI_RESET);
-        i++;
-      }
-    }
-    console.log(`Total = ${i}`);
-  } else {
-    for (const oneLink of allLinkFiles) {
-      if (oneLink.includes(videoId)) {
-        videoFile = oneLink;
-        break;
-      }
-    }
-  }
+//     let i = 0;
+//     for (const link of Object.keys(linkMap)) {
+//       if (!textMap[link]) {
+//         videoFile = linkMap[link];
+//         videoId = link;
+//         if (i < 10) {
+//           console.log("spawn for ", link);
+//           spawn("node", [".", "anthiago", "link=" + link]);
+//         }
+//         // console.log( `node . anthiago link=${link} &`);
+//         i++;
+//       }
+//     }
+//     console.log(`Total = ${i}`);
+//   } else {
+//     for (const oneLink of allLinkFiles) {
+//       if (oneLink.includes(videoId)) {
+//         videoFile = oneLink;
+//         break;
+//       }
+//     }
+//   }
 
-  if (!videoFile) {
-    return console.log("can not find file", videoFile);
-  }
-  // Read file to get url
-  const linkContent = JSON.parse(
-    fs.readFileSync("./links/" + videoFile, "utf-8")
-  );
-  const url = linkContent.url;
-  const page = await anthiago.initPage(async (res) => {
-    await page.select("#codeL", "ar");
-    await page.type("#url_input", url);
-    await page.waitForSelector("#boton_desgrabar");
-    await page.waitFor(4000);
-    await page.click("#boton_desgrabar");
-    try {
-      await page.waitForXPath('//*[@id="result"]/a[2]');
-      const text = await page.$eval("#result", (e) => e.innerHTML);
-      fs.writeFileSync("./text/" + videoId + ".html", text);
-      console.log(
-        "TRANSCRIBE DONE for videoId: ",
-        colors.TP_ANSI_BG_BLUE,
-        colors.TP_ANSI_FG_YELLOW,
-        `${videoId} => ${dayjs().diff(currentTime) / 1000}`,
-        colors.TP_ANSI_RESET,
-        `${dayjs().format("ddd D-MMM h:m:s a")}`
-      );
-    } catch {
-      console.log(
-        "Error for videoId: ",
-        colors.TP_ANSI_BG_RED,
-        colors.TP_ANSI_FG_YELLOW,
-        videoId,
-        `${dayjs().diff(currentTime) / 1000}`,
-        colors.TP_ANSI_RESET,
-        `${dayjs().format("ddd D-MMM h:m:s a")}`
-      );
-      fs.writeFileSync("./text/" + videoId + ".html", "error");
-    } finally {
-      anthiago.closeBrowser();
-    }
-  });
-  await page.goto("https://anthiago.com/transcript/", {
-    waitUntil: "domcontentloaded",
-  });
-}
+//   if (!videoFile) {
+//     return console.log("can not find file", videoFile);
+//   }
+//   // Read file to get url
+//   const linkContent = JSON.parse(
+//     fs.readFileSync("./links/" + videoFile, "utf-8")
+//   );
+//   const url = linkContent.url;
+//   const page = await anthiago.initPage(async (res) => {
+//     await page.select("#codeL", "ar");
+//     await page.type("#url_input", url);
+//     await page.waitForSelector("#boton_desgrabar");
+//     await page.waitFor(4000);
+//     await page.click("#boton_desgrabar");
+//     try {
+//       await page.waitForXPath('//*[@id="result"]/a[2]');
+//       const text = await page.$eval("#result", (e) => e.innerHTML);
+//       fs.writeFileSync("./text/" + videoId + ".html", text);
+//       console.log(
+//         "TRANSCRIBE DONE for videoId: ",
+//         `${videoId} => ${dayjs().diff(currentTime) / 1000}`,
+//         `${dayjs().format("ddd D-MMM h:m:s a")}`
+//       );
+//     } catch {
+//       console.log(
+//         "Error for videoId: ",
+//         videoId,
+//         `${dayjs().diff(currentTime) / 1000}`,
+//         `${dayjs().format("ddd D-MMM h:m:s a")}`
+//       );
+//       fs.writeFileSync("./text/" + videoId + ".html", "error");
+//     } finally {
+//       anthiago.closeBrowser();
+//     }
+//   });
+//   await page.goto("https://anthiago.com/transcript/", {
+//     waitUntil: "domcontentloaded",
+//   });
+// }
 
 async function save() {
   if (!specs.ALGOLIA_API_KEY) {
@@ -756,15 +730,15 @@ function convert_time(duration, inSeconds = false) {
 async function main() {
   await prepare();
 
-  if (process.argv.includes("anthiago")) {
-    try {
-      transcribeWithAnthiago();
-    } catch (err) {
-      console.log(err);
-    }
+  // if (process.argv.includes("anthiago")) {
+  //   try {
+  //     transcribeWithAnthiago();
+  //   } catch (err) {
+  //     console.log(err);
+  //   }
 
-    return;
-  }
+  //   return;
+  // }
 
   // if (process.argv.includes("audio")) {
   //     return downloadAudio();
