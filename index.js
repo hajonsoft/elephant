@@ -8,6 +8,7 @@ import inquirer from 'inquirer';
 import { exec } from 'child_process';
 import dayjs from 'dayjs';
 import puppeteer from 'puppeteer';
+import moment from 'moment';
 
 let allLinkFiles;
 let linkMap = {};
@@ -686,7 +687,7 @@ async function playVideo() {
     const notLiked = JSON.parse(fs.readFileSync('./notliked.json', 'utf-8'));
     for (const item of notLiked) {
       if (!watched[item.videoId]) {
-        watched[item.videoId] = true;
+        watched[item.videoId] = `"${moment().format("YYYY-MM-DD hh:mm:ss a")}"`;
         fs.writeFileSync('./watched.json', JSON.stringify(watched));
         const url = item.url;
         open(url);
