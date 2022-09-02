@@ -680,21 +680,33 @@ async function playVideo() {
   let watched = {};
   if (fs.existsSync("./watched.json")) {
     const watchedData = fs.readFileSync("./watched.json", "utf-8");
-    watched =  JSON.parse(watchedData);
+    watched = JSON.parse(watchedData);
   }
 
   if (fs.existsSync('./notliked.json')) {
     const notLiked = JSON.parse(fs.readFileSync('./notliked.json', 'utf-8'));
+
+    let sum = 0;
+    let nextVideo = null;
     for (const item of notLiked) {
       if (!watched[item.videoId]) {
-        watched[item.videoId] = `"${moment().format("YYYY-MM-DD hh:mm:ss a")}"`;
-        fs.writeFileSync('./watched.json', JSON.stringify(watched));
-        const url = item.url;
-        open(url);
-        return;
+
+        if (item.duration.split(':').length === 2) {
+          sum += moment.duration(`0:${item.duration}`).asSeconds();
+        } else {
+          sum += moment.duration(`0:${item.duration}`).asSeconds();
+        }
+
+        if (!nextVideo) {
+          watched[item.videoId] = `"${moment().format("YYYY-MM-DD hh:mm:ss a")}"`;
+          fs.writeFileSync('./watched.json', JSON.stringify(watched));
+          nextVideo = item;
+        }
       }
     }
-
+    console.log(`Remaining to watch ${Math.round(moment.duration(sum, 'seconds').asHours())} hours or ${Math.round(moment.duration(sum, 'seconds').asDays())} days`);
+    console.log('Next video', nextVideo);
+    open(nextVideo.url);
   }
 }
 
