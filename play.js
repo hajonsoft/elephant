@@ -59,14 +59,19 @@ import moment from 'moment';
 // fs.writeFileSync('./notLiked.json', JSON.stringify(sorted));
 // console.log('Total videos not yet liked (i.e watched)', sorted.length);
 
-const notLikedContent = fs.readFileSync('./notLiked.json', 'utf8')
-const notLiked = JSON.parse(notLikedContent);
-let sum = 0;
-for (const nl of notLiked) {
-    if (nl.duration.split(':').length === 2) {
-        sum += moment.duration(`0:${nl.duration}`).asSeconds();
-    } else {
-        sum += moment.duration(`0:${nl.duration}`).asSeconds();
-    }
-}
-const words = moment.duration(sum, 'seconds').asDays();
+// const notLikedContent = fs.readFileSync('./notLiked.json', 'utf8')
+// const notLiked = JSON.parse(notLikedContent);
+// let sum = 0;
+// for (const nl of notLiked) {
+//     if (nl.duration.split(':').length === 2) {
+//         sum += moment.duration(`0:${nl.duration}`).asSeconds();
+//     } else {
+//         sum += moment.duration(`0:${nl.duration}`).asSeconds();
+//     }
+// }
+// const words = moment.duration(sum, 'seconds').asDays();
+
+
+const message = "ايمن";
+
+console.log(encodemessage)

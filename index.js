@@ -9,6 +9,8 @@ import { exec } from 'child_process';
 import dayjs from 'dayjs';
 import puppeteer from 'puppeteer';
 import moment from 'moment';
+import RTLArabic from "rtl-arabic";
+
 
 let allLinkFiles;
 let linkMap = {};
@@ -705,8 +707,19 @@ async function playVideo() {
       }
     }
     console.log(`Remaining to watch ${Math.round(moment.duration(sum, 'seconds').asHours())} hours or ${Math.round(moment.duration(sum, 'seconds').asDays())} days`);
-    console.log('Next video', nextVideo);
-    open(nextVideo.url);
+    const title = new RTLArabic(nextVideo.title).convert();
+    const description = new RTLArabic(nextVideo.title).convert();
+    console.log({
+      title,
+      duration: nextVideo.duration,
+      position: nextVideo.position,
+      description,
+    });
+
+    console.log(`opening ${nextVideo.url}... in 5 seconds`);
+    setTimeout(() => {
+      open(nextVideo.url);
+    }, 5000);
   }
 }
 
