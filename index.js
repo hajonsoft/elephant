@@ -690,9 +690,10 @@ async function playVideo() {
 
     let sum = 0;
     let nextVideo = null;
+    let n = 0;
     for (const item of notLiked) {
       if (!watched[item.videoId]) {
-
+        n++;
         if (item.duration.split(':').length === 2) {
           sum += moment.duration(`0:${item.duration}`).asSeconds();
         } else {
@@ -706,9 +707,9 @@ async function playVideo() {
         }
       }
     }
-    console.log(`Remaining to watch ${Math.round(moment.duration(sum, 'seconds').asHours())} hours or ${Math.round(moment.duration(sum, 'seconds').asDays())} days`);
-    const title = new RTLArabic(nextVideo.title).convert();
-    const description = new RTLArabic(nextVideo.title).convert();
+    console.log(`Remaining to watch ${Math.round(moment.duration(sum, 'seconds').asHours())} hours or ${Math.round(moment.duration(sum, 'seconds').asDays())} days, ${n} videos`);
+    const title = nextVideo.title && new RTLArabic(nextVideo.title).convert();
+    const description = nextVideo.description && new RTLArabic(nextVideo.description).convert();
     console.log({
       title,
       duration: nextVideo.duration,
@@ -716,10 +717,11 @@ async function playVideo() {
       description,
     });
 
-    console.log(`opening ${nextVideo.url}... in 5 seconds`);
+    console.log(`opening video in 15 seconds`);
+    console.log(`${nextVideo.url}`);
     setTimeout(() => {
       open(nextVideo.url);
-    }, 5000);
+    }, 15000);
   }
 }
 
