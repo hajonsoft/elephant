@@ -707,9 +707,17 @@ async function playVideo() {
         }
       }
     }
+    let title;
+    let description;
+
     console.log(`Remaining to watch ${Math.round(moment.duration(sum, 'seconds').asHours())} hours or ${Math.round(moment.duration(sum, 'seconds').asDays())} days, ${n} videos`);
-    const title = nextVideo.title && new RTLArabic(nextVideo.title).convert();
-    const description = nextVideo.description && new RTLArabic(nextVideo.description).convert();
+    try {
+      title = nextVideo.title && new RTLArabic(nextVideo.title).convert();
+    } catch {}
+    try {
+      description = nextVideo.description && new RTLArabic(nextVideo.description).convert();
+    } catch {}
+    
     console.log({
       title,
       duration: nextVideo.duration,
