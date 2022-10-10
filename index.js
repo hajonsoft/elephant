@@ -725,6 +725,8 @@ async function playVideo() {
       description,
     });
 
+    
+    console.log(`git add . && git commit -m "Watched ${nextVideo.videoId}" && git push`);
     console.log(`opening video in 15 seconds`);
     console.log(`${nextVideo.url}`);
     setTimeout(() => {
