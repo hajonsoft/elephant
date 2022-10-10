@@ -1,16 +1,16 @@
-import { google } from 'googleapis';
-import open from 'open';
-import fs from 'fs';
-import path from 'path';
-import algoliaSearch from 'algoliasearch';
-import axios from 'axios';
-import inquirer from 'inquirer';
-import { exec } from 'child_process';
-import dayjs from 'dayjs';
-import puppeteer from 'puppeteer';
-import moment from 'moment';
+import { google } from "googleapis";
+import open from "open";
+import fs from "fs";
+import path from "path";
+import algoliaSearch from "algoliasearch";
+import axios from "axios";
+import inquirer from "inquirer";
+import { exec } from "child_process";
+import dayjs from "dayjs";
+import puppeteer from "puppeteer";
+import moment from "moment";
 import RTLArabic from "rtl-arabic";
-
+import clipboardy  from "clipboardy";
 
 let allLinkFiles;
 let linkMap = {};
@@ -86,7 +86,7 @@ async function getLinks() {
       "Channel Name:",
       channel.snippet.title.trim(),
       "videos: ",
-      channel.statistics.videoCount,
+      channel.statistics.videoCount
     );
     playlistId = channel.contentDetails.relatedPlaylists.uploads;
   }
@@ -228,13 +228,15 @@ async function transcribe() {
   const videoId = audioFiles?.[0];
   const stats = fs.statSync(`./mp3/${videoId}.flac`);
   const fileSize = `${Math.round(stats.size / (1024 * 1024), 1)} MB`;
-  const curl = `curl -X POST -u "apikey:${specs.WATSON_API_KEY
-    }" -o "${path.join(
-      __dirname,
-      "text",
-      videoId + ".json"
-    )}" --header "Content-Type: audio/flac" --data-binary @"./mp3/${videoId}.flac" "${specs.WATSON_URL
-    }/v1/recognize?model=ar-MS_BroadbandModel"`;
+  const curl = `curl -X POST -u "apikey:${
+    specs.WATSON_API_KEY
+  }" -o "${path.join(
+    __dirname,
+    "text",
+    videoId + ".json"
+  )}" --header "Content-Type: audio/flac" --data-binary @"./mp3/${videoId}.flac" "${
+    specs.WATSON_URL
+  }/v1/recognize?model=ar-MS_BroadbandModel"`;
   console.log(
     "TRANSCRIBE videoId: ",
     videoId,
@@ -495,20 +497,26 @@ async function addComment() {
 const liked = [];
 async function getLikes() {
   let nextPageToken = "";
-  const url = "https://www.googleapis.com/youtube/v3/videos?part=snippet&myRating=like&maxResults=20";
+  const url =
+    "https://www.googleapis.com/youtube/v3/videos?part=snippet&myRating=like&maxResults=20";
 
   const response = await axios.get(url, {
     headers: {
-      'Authorization': `Bearer ${specs.YOUTUBE_AUTH_TOKEN}`,
-      'pageToken': nextPageToken,
-    }
+      Authorization: `Bearer ${specs.YOUTUBE_AUTH_TOKEN}`,
+      pageToken: nextPageToken,
+    },
   });
-  console.log('%cMyProject%cline:522%cresponse', 'color:#fff;background:#ee6f57;padding:3px;border-radius:2px', 'color:#fff;background:#1f3c88;padding:3px;border-radius:2px', 'color:#fff;background:rgb(248, 147, 29);padding:3px;border-radius:2px', response)
-  nextPageToken = response.data.nextPageToken;
-  response.data.items.forEach(item => {
-    liked.push(item.id);
-  }
+  console.log(
+    "%cMyProject%cline:522%cresponse",
+    "color:#fff;background:#ee6f57;padding:3px;border-radius:2px",
+    "color:#fff;background:#1f3c88;padding:3px;border-radius:2px",
+    "color:#fff;background:rgb(248, 147, 29);padding:3px;border-radius:2px",
+    response
   );
+  nextPageToken = response.data.nextPageToken;
+  response.data.items.forEach((item) => {
+    liked.push(item.id);
+  });
 }
 
 async function setLiked(inputJSON) {
@@ -517,9 +525,7 @@ async function setLiked(inputJSON) {
       executablePath:
         "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
       headless: false,
-      args: [
-        "--profile-directory=Profile 8",
-      ]
+      args: ["--profile-directory=Profile 8"],
     });
     const page = await browser.newPage();
     await page.goto(inputJSON.url, {
@@ -685,8 +691,8 @@ async function playVideo() {
     watched = JSON.parse(watchedData);
   }
 
-  if (fs.existsSync('./notliked.json')) {
-    const notLiked = JSON.parse(fs.readFileSync('./notliked.json', 'utf-8'));
+  if (fs.existsSync("./notliked.json")) {
+    const notLiked = JSON.parse(fs.readFileSync("./notliked.json", "utf-8"));
 
     let sum = 0;
     let nextVideo = null;
@@ -694,15 +700,17 @@ async function playVideo() {
     for (const item of notLiked) {
       if (!watched[item.videoId]) {
         n++;
-        if (item.duration.split(':').length === 2) {
+        if (item.duration.split(":").length === 2) {
           sum += moment.duration(`0:${item.duration}`).asSeconds();
         } else {
           sum += moment.duration(`0:${item.duration}`).asSeconds();
         }
 
         if (!nextVideo) {
-          watched[item.videoId] = `"${moment().format("YYYY-MM-DD hh:mm:ss a")}"`;
-          fs.writeFileSync('./watched.json', JSON.stringify(watched));
+          watched[item.videoId] = `"${moment().format(
+            "YYYY-MM-DD hh:mm:ss a"
+          )}"`;
+          fs.writeFileSync("./watched.json", JSON.stringify(watched));
           nextVideo = item;
         }
       }
@@ -710,14 +718,21 @@ async function playVideo() {
     let title;
     let description;
 
-    console.log(`Remaining to watch ${Math.round(moment.duration(sum, 'seconds').asHours())} hours or ${Math.round(moment.duration(sum, 'seconds').asDays())} days, ${n} videos`);
+    console.log(
+      `Remaining to watch ${Math.round(
+        moment.duration(sum, "seconds").asHours()
+      )} hours or ${Math.round(
+        moment.duration(sum, "seconds").asDays()
+      )} days, ${n} videos`
+    );
     try {
       title = nextVideo.title && new RTLArabic(nextVideo.title).convert();
     } catch {}
     try {
-      description = nextVideo.description && new RTLArabic(nextVideo.description).convert();
+      description =
+        nextVideo.description && new RTLArabic(nextVideo.description).convert();
     } catch {}
-    
+
     console.log({
       title,
       duration: nextVideo.duration,
@@ -725,8 +740,9 @@ async function playVideo() {
       description,
     });
 
-    
-    console.log(`git add . && git commit -m "Watched ${nextVideo.videoId}" && git push`);
+    const gitCommand = `git add . && git commit -m "Watched ${nextVideo.videoId}" && git push`;
+    console.log(gitCommand);
+    clipboardy.writeSync(gitCommand);
     console.log(`opening video in 15 seconds`);
     console.log(`${nextVideo.url}`);
     setTimeout(() => {
@@ -734,7 +750,6 @@ async function playVideo() {
     }, 15000);
   }
 }
-
 
 function convert_time(duration, inSeconds = false) {
   var a = duration.match(/\d+/g);
@@ -832,9 +847,11 @@ async function main() {
           `1-Get video links => ./links ${links} files`,
           `2-Display ${links} links duration sorted ASC`,
           `3-Display ${links} links duration sorted DESC`,
-          `4-Transcribe ${remaining > 0 ? remaining : "0"
+          `4-Transcribe ${
+            remaining > 0 ? remaining : "0"
           } remaining videos using anthiago (multi threaded [max=10])`,
-          `5-Save ${unsaved > 0 ? unsaved : "0"
+          `5-Save ${
+            unsaved > 0 ? unsaved : "0"
           } unsaved transcriptions to algolia`,
           `6- Add comment ${remainingComments} remaining `,
           `7- Play a video`,
@@ -867,7 +884,6 @@ async function main() {
       if (answers.action.startsWith("7-")) {
         return playVideo();
       }
-
     });
 }
 
