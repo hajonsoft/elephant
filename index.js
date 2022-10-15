@@ -10,7 +10,8 @@ import dayjs from "dayjs";
 import puppeteer from "puppeteer";
 import moment from "moment";
 import RTLArabic from "rtl-arabic";
-import clipboardy  from "clipboardy";
+import clipboardy from "clipboardy";
+import chalk from "chalk";
 
 let allLinkFiles;
 let linkMap = {};
@@ -719,11 +720,13 @@ async function playVideo() {
     let description;
 
     console.log(
-      `Remaining to watch ${Math.round(
-        moment.duration(sum, "seconds").asHours()
-      )} hours or ${Math.round(
-        moment.duration(sum, "seconds").asDays()
-      )} days, ${n} videos`
+      chalk.bgHex("#f1f8e9").hex("#33691e")(
+        `Remaining to watch ${Math.round(
+          moment.duration(sum, "seconds").asHours()
+        )} hours or ${Math.round(
+          moment.duration(sum, "seconds").asDays()
+        )} days, ${n} videos`
+      )
     );
     try {
       title = nextVideo.title && new RTLArabic(nextVideo.title).convert();
@@ -733,18 +736,24 @@ async function playVideo() {
         nextVideo.description && new RTLArabic(nextVideo.description).convert();
     } catch {}
 
-    console.log({
-      title,
-      duration: nextVideo.duration,
-      position: nextVideo.position,
-      description,
-    });
+    console.log(
+      chalk.bgHex("#c5cae9").hex("#1a237e")(
+        JSON.stringify({
+          title,
+          duration: nextVideo.duration,
+          position: nextVideo.position,
+          description,
+        })
+      )
+    );
 
     const gitCommand = `git add . && git commit -m "Watched ${nextVideo.videoId}" && git push`;
-    console.log(gitCommand);
+    console.log(chalk.bgHex("#fff9c4").hex("#f57f17")(gitCommand));
     clipboardy.writeSync(gitCommand);
-    console.log(`opening video in 15 seconds`);
-    console.log(`${nextVideo.url}`);
+    console.log(
+      chalk.bgHex("#bbdefb").hex("#0d47a1")(`opening video in 15 seconds`)
+    );
+    console.log(chalk.bgHex("#f5f5f5").hex("#212121")(`${nextVideo.url}`));
     setTimeout(() => {
       open(nextVideo.url);
     }, 15000);
@@ -808,7 +817,7 @@ async function main() {
   if (!process.argv.includes("-i")) {
     return playVideo();
   }
-  
+
   await prepare();
 
   // if (process.argv.includes("anthiago")) {
