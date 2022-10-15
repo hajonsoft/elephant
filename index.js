@@ -805,6 +805,10 @@ function convert_time(duration, inSeconds = false) {
 }
 
 async function main() {
+  if (!process.argv.includes("-i")) {
+    return playVideo();
+  }
+  
   await prepare();
 
   // if (process.argv.includes("anthiago")) {
