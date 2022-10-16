@@ -12,7 +12,7 @@ Demo login with alialiayman@gmail.com
 
 # to get likes
 
-Download all the videos as json using chrome and paste into a file
+Download all the videos as json using chrome and paste into a file in ./likes
 then run code in play.js
 
 
