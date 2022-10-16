@@ -748,12 +748,11 @@ async function playVideo() {
     );
 
     const gitCommand = `git add . && git commit -m "Watched ${nextVideo.videoId}" && git push`;
-    console.log(chalk.bgHex("#fff9c4").hex("#f57f17")(gitCommand));
     clipboardy.writeSync(gitCommand);
+    console.log(chalk.bgHex("#fff9c4").hex("#f57f17")(gitCommand), chalk.bgHex("#eee").hex("#333")("Copied to clipboard"));
     console.log(
-      chalk.bgHex("#bbdefb").hex("#0d47a1")(`opening video in 15 seconds`)
+      chalk.bgHex("#bbdefb").hex("#0d47a1")(`opening video in 15 seconds ${nextVideo.url}`)
     );
-    console.log(chalk.bgHex("#f5f5f5").hex("#212121")(`${nextVideo.url}`));
     setTimeout(() => {
       open(nextVideo.url);
     }, 15000);

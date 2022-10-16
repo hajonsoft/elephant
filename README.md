@@ -10,6 +10,11 @@ Demo login with alialiayman@gmail.com
 
 ![image](https://user-images.githubusercontent.com/9623964/144528747-b3f2e257-c24b-47a6-a8c4-1782e739976d.png)
 
+# to get likes
+
+Download all the videos as json using chrome and paste into a file
+then run code in play.js
+
 
 # Commands
 
