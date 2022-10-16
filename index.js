@@ -814,7 +814,8 @@ function convert_time(duration, inSeconds = false) {
 
 async function main() {
   if (!process.argv.includes("-i")) {
-    return playVideo();
+    playVideo();
+    return ;
   }
 
   await prepare();
