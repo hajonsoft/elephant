@@ -755,6 +755,7 @@ async function playVideo() {
     );
     setTimeout(() => {
       open(nextVideo.url);
+      process.exit();
     }, 15000);
   }
 }
@@ -814,7 +815,7 @@ function convert_time(duration, inSeconds = false) {
 
 async function main() {
   if (!process.argv.includes("-i")) {
-    playVideo();
+    await playVideo();
     return ;
   }
 
