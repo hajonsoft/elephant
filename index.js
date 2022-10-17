@@ -685,79 +685,83 @@ async function exportLinks() {
   }
 }
 
-async function playVideo() {
-  let watched = {};
+function getAllVideos() {
+  if (fs.existsSync("./notliked.json")) {
+    return JSON.parse(fs.readFileSync("./notliked.json", "utf-8"));
+  }
+
+  return {};
+}
+
+function getDuration(videos) {
+  const seconds = videos.reduce((a, v) => {
+    if (v.duration.split(":").length === 2) {
+      a += moment.duration(`0:${v.duration}`).asSeconds();
+    } else {
+      a += moment.duration(`0:${v.duration}`).asSeconds();
+    }
+    return a;
+  }, 0);
+
+  const hours = moment.duration(seconds, "seconds").asHours().toFixed(2);
+  const days = moment.duration(seconds, "seconds").asDays().toFixed(1);
+
+  return { hours, days, count: videos.length };
+}
+
+ function playVideo() {
+  const watched = getWatched();
+  const allVideos = getAllVideos();
+  const availableVideos = allVideos.filter((video) => !watched[video.videoId]);
+  const availableStats = getDuration(availableVideos);
+  const nextVideo = availableVideos[0];
+  let title;
+  let description;
+
+  try {
+    title = nextVideo.title && new RTLArabic(nextVideo.title).convert();
+  } catch {}
+  try {
+    description =
+      nextVideo.description && new RTLArabic(nextVideo.description).convert();
+  } catch {}
+
+  const gitCommand = `git add . && git commit -m "Watched ${nextVideo.videoId}" && git push`;
+  clipboardy.writeSync(gitCommand);
+  console.log(
+    chalk.hex("#007FFF")(gitCommand),
+    chalk.hex("#F5FFFA")("Copied to clipboard")
+  );
+
+  console.log(
+    "Remaining: ",
+    chalk.hex("#FFFF00")(`${availableStats.count}`),
+    "Hours: ",
+    chalk.hex("#FFFF00")(`${availableStats.hours}`),
+    "Days: ",
+    chalk.hex("#FFFF00")(availableStats.days),
+    "Watched: ",
+    chalk.hex("#FFFF00")(Object.keys(watched).length),
+    "Title: ",
+    chalk.hex("#FFFF00")(title),
+    "Description: ",
+    chalk.hex("#FFFF00")(description),
+    "Video: ",
+    chalk.hex("#FFFF00")(nextVideo.url)
+  );
+
+  watched[nextVideo.videoId] = `"${moment().format("YYYY-MM-DD hh:mm:ss a")}"`;
+  fs.writeFileSync("./watched.json", JSON.stringify(watched));
+  open(nextVideo.url);
+  process.exit();
+}
+
+function getWatched() {
   if (fs.existsSync("./watched.json")) {
     const watchedData = fs.readFileSync("./watched.json", "utf-8");
-    watched = JSON.parse(watchedData);
+    return JSON.parse(watchedData);
   }
-
-  if (fs.existsSync("./notliked.json")) {
-    const notLiked = JSON.parse(fs.readFileSync("./notliked.json", "utf-8"));
-
-    let sum = 0;
-    let nextVideo = null;
-    let n = 0;
-    for (const item of notLiked) {
-      if (!watched[item.videoId]) {
-        n++;
-        if (item.duration.split(":").length === 2) {
-          sum += moment.duration(`0:${item.duration}`).asSeconds();
-        } else {
-          sum += moment.duration(`0:${item.duration}`).asSeconds();
-        }
-
-        if (!nextVideo) {
-          watched[item.videoId] = `"${moment().format(
-            "YYYY-MM-DD hh:mm:ss a"
-          )}"`;
-          fs.writeFileSync("./watched.json", JSON.stringify(watched));
-          nextVideo = item;
-        }
-      }
-    }
-    let title;
-    let description;
-
-    console.log(
-      chalk.bgHex("#f1f8e9").hex("#33691e")(
-        `Remaining to watch ${Math.round(
-          moment.duration(sum, "seconds").asHours()
-        )} hours or ${Math.round(
-          moment.duration(sum, "seconds").asDays()
-        )} days, ${n} videos`
-      )
-    );
-    try {
-      title = nextVideo.title && new RTLArabic(nextVideo.title).convert();
-    } catch {}
-    try {
-      description =
-        nextVideo.description && new RTLArabic(nextVideo.description).convert();
-    } catch {}
-
-    console.log(
-      chalk.bgHex("#c5cae9").hex("#1a237e")(
-        JSON.stringify({
-          title,
-          duration: nextVideo.duration,
-          position: nextVideo.position,
-          description,
-        })
-      )
-    );
-
-    const gitCommand = `git add . && git commit -m "Watched ${nextVideo.videoId}" && git push`;
-    clipboardy.writeSync(gitCommand);
-    console.log(chalk.bgHex("#fff9c4").hex("#f57f17")(gitCommand), chalk.bgHex("#eee").hex("#333")("Copied to clipboard"));
-    console.log(
-      chalk.bgHex("#bbdefb").hex("#0d47a1")(`opening video in 15 seconds ${nextVideo.url}`)
-    );
-    setTimeout(() => {
-      open(nextVideo.url);
-      process.exit();
-    }, 15000);
-  }
+  return {};
 }
 
 function convert_time(duration, inSeconds = false) {
@@ -815,35 +819,11 @@ function convert_time(duration, inSeconds = false) {
 
 async function main() {
   if (!process.argv.includes("-i")) {
-    await playVideo();
-    return ;
+    playVideo();
   }
 
+  return;
   await prepare();
-
-  // if (process.argv.includes("anthiago")) {
-  //   try {
-  //     transcribeWithAnthiago();
-  //   } catch (err) {
-  //     console.log(err);
-  //   }
-
-  //   return;
-  // }
-
-  // if (process.argv.includes("audio")) {
-  //     return downloadAudio();
-  // }
-  // if (process.argv.includes("text")) {
-  //     return transcribe();
-  // }
-  // if (process.argv.includes("clean")) {
-  //     clean();
-  // }
-  // if (process.argv.includes("export")) {
-  //     exportLinks();
-  // }
-
   const links = fs.readdirSync("./links")?.length;
   const remaining = links - fs.readdirSync("./text")?.length;
   const unsaved = remaining - fs.readdirSync("./db")?.length;

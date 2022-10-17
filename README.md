@@ -3,6 +3,11 @@
 brew install ffmpeg
 pnpm i
 
+airbnb dependency
+npm install -g install-peerdeps install-peerdeps --dev eslint-config-airbnb install-peerdeps --dev eslint-config-airbnb-base
+
+
+
 
 Demo login with alialiayman@gmail.com
 
