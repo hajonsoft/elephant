@@ -709,7 +709,7 @@ function getDuration(videos) {
   return { hours, days, count: videos.length };
 }
 
- function playVideo() {
+function playVideo() {
   const watched = getWatched();
   const allVideos = getAllVideos();
   const availableVideos = allVideos.filter((video) => !watched[video.videoId]);
@@ -726,29 +726,30 @@ function getDuration(videos) {
       nextVideo.description && new RTLArabic(nextVideo.description).convert();
   } catch {}
 
-  const gitCommand = `git add . && git commit -m "Watched ${nextVideo.videoId}" && git push`;
+  const gitCommand = `git add . && git commit -m "تمت المشاهده مع الشكر https://github.com/hajonsoft/elephant.git ${nextVideo.videoId}" && git push`;
   clipboardy.writeSync(gitCommand);
   console.log(
-    chalk.hex("#007FFF")(gitCommand),
+    chalk.hex("#d7ccc8")(gitCommand),
     chalk.hex("#F5FFFA")("Copied to clipboard")
   );
 
+  console.log(chalk.hex("#bbdefb")(`Watched: ${watched.length}`));
   console.log(
-    "Remaining: ",
-    chalk.hex("#FFFF00")(`${availableStats.count}`),
-    "Hours: ",
-    chalk.hex("#FFFF00")(`${availableStats.hours}`),
-    "Days: ",
-    chalk.hex("#FFFF00")(availableStats.days),
-    "Watched: ",
-    chalk.hex("#FFFF00")(Object.keys(watched).length),
-    "Title: ",
-    chalk.hex("#FFFF00")(title),
-    "Description: ",
-    chalk.hex("#FFFF00")(description),
-    "Video: ",
-    chalk.hex("#FFFF00")(nextVideo.url)
+    chalk.hex("#ffcdd2")(
+      `Available: ${availableStats.count} (${availableStats.hours} hours, ${availableStats.days} days)`
+    )
   );
+
+  console.log(
+    chalk.hex("#b2dfdb")(`Title: ${title}`),
+    chalk.hex("#dcedc8")(`Description: ${description}`)
+  );
+
+  console.log(
+    chalk.hex("#fff9c4")(`Video: ${nextVideo.url}`),
+    chalk.hex("#ffe0b2")(`Duration: ${nextVideo.duration}`)
+  );
+
 
   watched[nextVideo.videoId] = `"${moment().format("YYYY-MM-DD hh:mm:ss a")}"`;
   fs.writeFileSync("./watched.json", JSON.stringify(watched));
