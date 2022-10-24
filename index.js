@@ -726,7 +726,7 @@ function playVideo() {
       nextVideo.description && new RTLArabic(nextVideo.description).convert();
   } catch {}
 
-  const gitCommand = `git add . && git commit -m "تمت المشاهده مع الشكر https://github.com/hajonsoft/elephant.git ${nextVideo.videoId}" && git push`;
+  const gitCommand = `git commit -am "تمت المشاهده مع الشكر https://github.com/hajonsoft/elephant.git ${nextVideo.videoId}" && git push`;
   clipboardy.writeSync(gitCommand);
   console.log(
     chalk.hex("#d7ccc8")(gitCommand),
