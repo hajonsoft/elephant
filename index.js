@@ -733,7 +733,7 @@ function playVideo() {
     chalk.hex("#F5FFFA")("Copied to clipboard")
   );
 
-  console.log(chalk.hex("#bbdefb")(`Watched: ${watched.length}`));
+  console.log(chalk.hex("#bbdefb")(`Watched: ${Object.keys(watched).length}`));
   console.log(
     chalk.hex("#ffcdd2")(
       `Available: ${availableStats.count} (${availableStats.hours} hours, ${availableStats.days} days)`
