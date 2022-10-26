@@ -750,8 +750,12 @@ function playVideo() {
     chalk.hex("#ffe0b2")(`Duration: ${nextVideo.duration}`)
   );
 
-
-  watched[nextVideo.videoId] = `"${moment().format("YYYY-MM-DD hh:mm:ss a")}"`;
+  watched[nextVideo.videoId] = {
+    at: `${moment().format("YYYY-MM-DD hh:mm:ss a")}`,
+    url: nextVideo.url,
+    duration: nextVideo.duration,
+    title: nextVideo.title,
+  };
   fs.writeFileSync("./watched.json", JSON.stringify(watched));
   open(nextVideo.url);
   process.exit();
