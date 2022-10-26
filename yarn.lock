@@ -447,6 +447,13 @@
   dependencies:
     "tweetnacl" "^0.14.3"
 
+"beeper@^3.0.0":
+  "integrity" "sha512-8d0BXEuBIiPfmKvATnSCN58sGKCB3vy+lwORdSvfC5uN6OMlPj9/aVMXsmvt5dIvjjyxiuKYfMVWpiAh/kJr5w=="
+  "resolved" "https://registry.npmjs.org/beeper/-/beeper-3.0.0.tgz"
+  "version" "3.0.0"
+  dependencies:
+    "yoctodelay" "^1.2.0"
+
 "bignumber.js@^9.0.0":
   "integrity" "sha512-IdZR9mh6ahOBv/hYGiXyVuyCetmGJhtYkqLBpTStdhEGjegpPlUawydyaF3pbIOFynJTpllEs+NP+CS9jKFLjA=="
   "resolved" "https://registry.npmjs.org/bignumber.js/-/bignumber.js-9.0.1.tgz"
@@ -2463,3 +2470,8 @@
   dependencies:
     "buffer-crc32" "~0.2.3"
     "fd-slicer" "~1.1.0"
+
+"yoctodelay@^1.2.0":
+  "integrity" "sha512-12y/P9MSig9/5BEhBgylss+fkHiCRZCvYR81eH35NW9uw801cvJt31EAV+WOLcwZRZbLiIQl/hxcdXXXFmGvXg=="
+  "resolved" "https://registry.npmjs.org/yoctodelay/-/yoctodelay-1.2.0.tgz"
+  "version" "1.2.0"

@@ -12,6 +12,7 @@ import moment from "moment";
 import RTLArabic from "rtl-arabic";
 import clipboardy from "clipboardy";
 import chalk from "chalk";
+import beeper from 'beeper';
 
 let allLinkFiles;
 let linkMap = {};
@@ -709,7 +710,7 @@ function getDuration(videos) {
   return { hours, days, count: videos.length };
 }
 
-function playVideo() {
+async function playVideo() {
   const watched = getWatched();
   const allVideos = getAllVideos();
   const availableVideos = allVideos.filter((video) => !watched[video.videoId]);
@@ -728,6 +729,7 @@ function playVideo() {
 
   const gitCommand = `git commit -am "تمت المشاهده مع الشكر https://github.com/hajonsoft/elephant.git ${nextVideo.videoId}" && git push`;
   clipboardy.writeSync(gitCommand);
+  await beeper("*-*")
   console.log(
     chalk.hex("#d7ccc8")(gitCommand),
     chalk.hex("#F5FFFA")("Copied to clipboard")
