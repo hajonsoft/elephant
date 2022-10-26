@@ -729,27 +729,27 @@ async function playVideo() {
 
   const gitCommand = `git commit -am "تمت المشاهده مع الشكر https://github.com/hajonsoft/elephant.git ${nextVideo.videoId}" && git push`;
   clipboardy.writeSync(gitCommand);
-  await beeper("*-*")
+  await beeper(2);
   console.log(
-    chalk.hex("#d7ccc8")(gitCommand),
-    chalk.hex("#F5FFFA")("Copied to clipboard")
+    chalk.bgHex("#263238").hex("#d7ccc8")(gitCommand),
+    chalk.bgHex("#263238").hex("#F5FFFA")("Copied to clipboard")
   );
 
-  console.log(chalk.hex("#bbdefb")(`Watched: ${Object.keys(watched).length}`));
+  console.log(chalk.bgHex("#263238").hex("#bbdefb")(`Watched: ${Object.keys(watched).length}`));
   console.log(
-    chalk.hex("#ffcdd2")(
+    chalk.bgHex("#263238").hex("#ffcdd2")(
       `Available: ${availableStats.count} (${availableStats.hours} hours, ${availableStats.days} days)`
     )
   );
 
   console.log(
-    chalk.hex("#b2dfdb")(`Title: ${title}`),
-    chalk.hex("#dcedc8")(`Description: ${description}`)
+    chalk.bgHex("#263238").hex("#b2dfdb")(`Title: ${title}`),
+    chalk.bgHex("#263238").hex("#dcedc8")(`Description: ${description}`)
   );
 
   console.log(
-    chalk.hex("#fff9c4")(`Video: ${nextVideo.url}`),
-    chalk.hex("#ffe0b2")(`Duration: ${nextVideo.duration}`)
+    chalk.bgHex("#263238").hex("#fff9c4")(`Video: ${nextVideo.url}`),
+    chalk.bgHex("#263238").hex("#ffe0b2")(`Duration: ${nextVideo.duration}`)
   );
 
   watched[nextVideo.videoId] = {
