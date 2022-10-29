@@ -731,26 +731,27 @@ async function playVideo() {
   clipboardy.writeSync(gitCommand);
   await beeper(2);
   console.log(
-    chalk.bgHex("#263238").hex("#d7ccc8")(gitCommand),
-    chalk.bgHex("#263238").hex("#F5FFFA")("Copied to clipboard")
+    chalk.bgHex("#4a148c").hex("#f3e5f5")(`.. ${gitCommand} .. `),
+    chalk.bgHex("#f3e5f5").hex("#4a148c")("  [Copied to clipboard]  ")
   );
 
-  console.log(chalk.bgHex("#263238").hex("#bbdefb")(`Watched: ${Object.keys(watched).length}`));
   console.log(
-    chalk.bgHex("#263238").hex("#ffcdd2")(
+    chalk.bgHex("#4a148c").hex("#f3e5f5")(`Video: ${nextVideo.url}`),
+    chalk.bgHex("#f3e5f5").hex("#4a148c")(`Duration: ${nextVideo.duration}`)
+  );
+
+  console.log(
+    chalk.bgHex("#4a148c").hex("#f3e5f5")(`Title: ${title}`),
+    chalk.bgHex("#f3e5f5").hex("#4a148c")(`${description ? 'Description: ' : ''}${description}`)
+  );
+
+
+  console.log(
+    chalk.bgHex("#1b5e20").hex("#e8f5e9")(
       `Available: ${availableStats.count} (${availableStats.hours} hours, ${availableStats.days} days)`
     )
   );
-
-  console.log(
-    chalk.bgHex("#263238").hex("#b2dfdb")(`Title: ${title}`),
-    chalk.bgHex("#263238").hex("#dcedc8")(`Description: ${description}`)
-  );
-
-  console.log(
-    chalk.bgHex("#263238").hex("#fff9c4")(`Video: ${nextVideo.url}`),
-    chalk.bgHex("#263238").hex("#ffe0b2")(`Duration: ${nextVideo.duration}`)
-  );
+  console.log(chalk.bgHex("#1b5e20").hex("#e8f5e9")(`Watched: ${Object.keys(watched).length}`));
 
   watched[nextVideo.videoId] = {
     at: `${moment().format("YYYY-MM-DD hh:mm:ss a")}`,
