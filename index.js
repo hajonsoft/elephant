@@ -1,18 +1,17 @@
-import { google } from "googleapis";
-import open from "open";
-import fs from "fs";
-import path from "path";
 import algoliaSearch from "algoliasearch";
 import axios from "axios";
-import inquirer from "inquirer";
-import { exec } from "child_process";
-import dayjs from "dayjs";
-import puppeteer from "puppeteer";
-import moment from "moment";
-import RTLArabic from "rtl-arabic";
-import clipboardy from "clipboardy";
+import beeper from "beeper";
 import chalk from "chalk";
-import beeper from 'beeper';
+import { exec } from "child_process";
+import clipboardy from "clipboardy";
+import fs from "fs";
+import { google } from "googleapis";
+import inquirer from "inquirer";
+import moment from "moment";
+import open from "open";
+import path from "path";
+import puppeteer from "puppeteer";
+import RTLArabic from "rtl-arabic";
 
 let allLinkFiles;
 let linkMap = {};
@@ -742,16 +741,21 @@ async function playVideo() {
 
   console.log(
     chalk.bgHex("#4a148c").hex("#f3e5f5")(`Title: ${title}`),
-    chalk.bgHex("#f3e5f5").hex("#4a148c")(`${description ? 'Description: ' : ''}${description}`)
+    chalk.bgHex("#f3e5f5").hex("#4a148c")(
+      `${description ? "Description: " : ""}${description}`
+    )
   );
-
 
   console.log(
     chalk.bgHex("#1b5e20").hex("#e8f5e9")(
       `Available: ${availableStats.count} (${availableStats.hours} hours, ${availableStats.days} days)`
     )
   );
-  console.log(chalk.bgHex("#1b5e20").hex("#e8f5e9")(`Watched: ${Object.keys(watched).length}`));
+  console.log(
+    chalk.bgHex("#1b5e20").hex("#e8f5e9")(
+      `Watched: ${Object.keys(watched).length}`
+    )
+  );
 
   watched[nextVideo.videoId] = {
     at: `${moment().format("YYYY-MM-DD hh:mm:ss a")}`,
