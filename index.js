@@ -703,7 +703,11 @@ function getDuration(videos) {
     return a;
   }, 0);
 
-  const hours = moment.duration(seconds, "seconds").asHours().toFixed(2);
+  const duration = moment.duration(seconds, "seconds");
+  const wholeHours = Math.floor(duration.asHours());
+  const mins = Math.floor(duration.asMinutes()) - wholeHours * 60;
+
+  const hours = `${wholeHours}:${mins < 10 ? `0${mins}` : mins}`;
   const days = moment.duration(seconds, "seconds").asDays().toFixed(1);
 
   return { hours, days, count: videos.length };
