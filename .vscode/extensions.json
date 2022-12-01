@@ -18,6 +18,7 @@
 		"streetsidesoftware.code-spell-checker",
 		"kamikillerto.vscode-colorize",
 		"nicegyuha.quick-console-log",
+		"ms-vsliveshare.vsliveshare-pack",
 	],
 	// List of extensions recommended by VS Code that should not be recommended for users of this workspace.
 	"unwantedRecommendations": [
