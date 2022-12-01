@@ -19,6 +19,7 @@
 		"kamikillerto.vscode-colorize",
 		"nicegyuha.quick-console-log",
 		"ms-vsliveshare.vsliveshare-pack",
+		"chrmarti.regex",
 	],
 	// List of extensions recommended by VS Code that should not be recommended for users of this workspace.
 	"unwantedRecommendations": [
