@@ -20,6 +20,7 @@
     "clipboardy": "^3.0.0",
     "dayjs": "^1.10.7",
     "fluent-ffmpeg": "^2.1.2",
+    "fs-extra": "^11.1.0",
     "google-auth-library": "^7.10.2",
     "googleapis": "^91.0.0",
     "ibm-watson": "^6.2.1",
