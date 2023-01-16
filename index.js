@@ -836,9 +836,9 @@ function convert_time(duration, inSeconds = false) {
 async function main() {
   if (!process.argv.includes("-i")) {
     playVideo();
+    return ;
   }
 
-  return;
   await prepare();
   const links = fs.readdirSync("./links")?.length;
   const remaining = links - fs.readdirSync("./text")?.length;
