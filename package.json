@@ -14,10 +14,13 @@
     "@types/node": "^16.11.10",
     "algoliasearch": "^4.11.0",
     "axios": "^0.24.0",
+    "beeper": "^3.0.0",
     "bluebird": "^3.7.2",
+    "chalk": "^5.1.2",
     "clipboardy": "^3.0.0",
     "dayjs": "^1.10.7",
     "fluent-ffmpeg": "^2.1.2",
+    "fs-extra": "^11.1.0",
     "google-auth-library": "^7.10.2",
     "googleapis": "^91.0.0",
     "ibm-watson": "^6.2.1",
@@ -26,6 +29,12 @@
     "open": "^8.4.0",
     "puppeteer": "^15.4.0",
     "puppeteer-extra": "^3.2.3",
+    "rtl-arabic": "^2.1.0",
     "watson-developer-cloud": "^2.40.0"
+  },
+  "devDependencies": {
+    "@types/readable-stream": "^2.3.14",
+    "@types/request": "^2.48.8",
+    "@types/request-promise-native": "^1.0.18"
   }
 }

@@ -3,12 +3,22 @@
 brew install ffmpeg
 pnpm i
 
+airbnb dependency
+npm install -g install-peerdeps install-peerdeps --dev eslint-config-airbnb install-peerdeps --dev eslint-config-airbnb-base
+
+
+
 
 Demo login with alialiayman@gmail.com
 
 [Search Ahmed Subhi Mansour](www.algolia.com/interface-demos/ca4f4aab-d3a1-4c61-a74d-c1716724795b)
 
 ![image](https://user-images.githubusercontent.com/9623964/144528747-b3f2e257-c24b-47a6-a8c4-1782e739976d.png)
+
+# to get likes
+
+Download all the videos as json using chrome and paste into a file in ./likes
+then run code in play.js
 
 
 # Commands
@@ -159,3 +169,5 @@ Search example
 https://www.algolia.com/doc/guides/building-search-ui/getting-started/react/
 
 
+## liked videos
+https://www.youtube.com/playlist?list=LL

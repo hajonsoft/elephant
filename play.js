@@ -23,38 +23,55 @@ import moment from 'moment';
 // setInterval(() => {
 //     main();
 // }, 1000);
-let notLiked = []
-const liked = {};
-const links = fs.readdirSync('./links');
-const likes = fs.readdirSync('./likes');
-for (const like of likes) {
-    const videos = JSON.parse(fs.readFileSync(`./likes/${like}`, 'utf8'))
-    for (const video of videos) {
-        liked[video] = true;
-    }
-}
+// let notLiked = []
+// const liked = {};
+// const links = fs.readdirSync('./links');
+// const likes = fs.readdirSync('./likes');
+// for (const like of likes) {
+//     const videos = JSON.parse(fs.readFileSync(`./likes/${like}`, 'utf8'))
+//     for (const video of videos) {
+//         liked[video] = true;
+//     }
+// }
 
-for (const link of links) {
-    const video = JSON.parse(fs.readFileSync(`./links/${link}`, 'utf8'));
-    if (liked[video.videoId]) {
-        video.liked = true;
-    } else {
-        video.liked = false;
-        notLiked.push({
-            url: video.url,
-            videoId: video.videoId,
-            duration: video.duration.formatted,
-            position: video.snippet.position,
-            title: video.title,
-            description: video.snippet.description,
-            date: moment(video.date).format('dddd YYYY-MM-DD hh:mm:ss a'),
-            since: moment(video.date).fromNow(),
-        })
-    }
-}
+// for (const link of links) {
+//     const video = JSON.parse(fs.readFileSync(`./links/${link}`, 'utf8'));
+//     if (liked[video.videoId]) {
+//         video.liked = true;
+//     } else {
+//         video.liked = false;
+//         notLiked.push({
+//             url: video.url,
+//             videoId: video.videoId,
+//             duration: video.duration.formatted,
+//             position: video.snippet.position,
+//             title: video.title,
+//             description: video.snippet.description,
+//             date: moment(video.date).format('dddd YYYY-MM-DD hh:mm:ss a'),
+//             since: moment(video.date).fromNow(),
+//         })
+//     }
+// }
 
-const sorted = notLiked.sort((a, b) => {
-    return a.position - b.position;
-}).reverse();
-fs.writeFileSync('./notLiked.json', JSON.stringify(sorted));
-console.log('Total videos not yet liked (i.e watched)', sorted.length);
+// const sorted = notLiked.sort((a, b) => {
+//     return a.position - b.position;
+// }).reverse();
+// fs.writeFileSync('./notLiked.json', JSON.stringify(sorted));
+// console.log('Total videos not yet liked (i.e watched)', sorted.length);
+
+// const notLikedContent = fs.readFileSync('./notLiked.json', 'utf8')
+// const notLiked = JSON.parse(notLikedContent);
+// let sum = 0;
+// for (const nl of notLiked) {
+//     if (nl.duration.split(':').length === 2) {
+//         sum += moment.duration(`0:${nl.duration}`).asSeconds();
+//     } else {
+//         sum += moment.duration(`0:${nl.duration}`).asSeconds();
+//     }
+// }
+// const words = moment.duration(sum, 'seconds').asDays();
+
+
+const message = "ايمن";
+
+console.log(encodemessage)

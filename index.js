@@ -1,13 +1,17 @@
-import { google } from 'googleapis';
-import open from 'open';
-import fs from 'fs';
-import path from 'path';
-import algoliaSearch from 'algoliasearch';
-import axios from 'axios';
-import inquirer from 'inquirer';
-import { exec } from 'child_process';
-import dayjs from 'dayjs';
-import puppeteer from 'puppeteer';
+import algoliaSearch from "algoliasearch";
+import axios from "axios";
+import beeper from "beeper";
+import chalk from "chalk";
+import { exec } from "child_process";
+import clipboardy from "clipboardy";
+import fs from "fs";
+import { google } from "googleapis";
+import inquirer from "inquirer";
+import moment from "moment";
+import open from "open";
+import path from "path";
+import puppeteer from "puppeteer";
+import RTLArabic from "rtl-arabic";
 
 let allLinkFiles;
 let linkMap = {};
@@ -83,7 +87,7 @@ async function getLinks() {
       "Channel Name:",
       channel.snippet.title.trim(),
       "videos: ",
-      channel.statistics.videoCount,
+      channel.statistics.videoCount
     );
     playlistId = channel.contentDetails.relatedPlaylists.uploads;
   }
@@ -225,13 +229,15 @@ async function transcribe() {
   const videoId = audioFiles?.[0];
   const stats = fs.statSync(`./mp3/${videoId}.flac`);
   const fileSize = `${Math.round(stats.size / (1024 * 1024), 1)} MB`;
-  const curl = `curl -X POST -u "apikey:${specs.WATSON_API_KEY
-    }" -o "${path.join(
-      __dirname,
-      "text",
-      videoId + ".json"
-    )}" --header "Content-Type: audio/flac" --data-binary @"./mp3/${videoId}.flac" "${specs.WATSON_URL
-    }/v1/recognize?model=ar-MS_BroadbandModel"`;
+  const curl = `curl -X POST -u "apikey:${
+    specs.WATSON_API_KEY
+  }" -o "${path.join(
+    __dirname,
+    "text",
+    videoId + ".json"
+  )}" --header "Content-Type: audio/flac" --data-binary @"./mp3/${videoId}.flac" "${
+    specs.WATSON_URL
+  }/v1/recognize?model=ar-MS_BroadbandModel"`;
   console.log(
     "TRANSCRIBE videoId: ",
     videoId,
@@ -492,20 +498,26 @@ async function addComment() {
 const liked = [];
 async function getLikes() {
   let nextPageToken = "";
-  const url = "https://www.googleapis.com/youtube/v3/videos?part=snippet&myRating=like&maxResults=20";
+  const url =
+    "https://www.googleapis.com/youtube/v3/videos?part=snippet&myRating=like&maxResults=20";
 
   const response = await axios.get(url, {
     headers: {
-      'Authorization': `Bearer ${specs.YOUTUBE_AUTH_TOKEN}`,
-      'pageToken': nextPageToken,
-    }
+      Authorization: `Bearer ${specs.YOUTUBE_AUTH_TOKEN}`,
+      pageToken: nextPageToken,
+    },
   });
-  console.log('%cMyProject%cline:522%cresponse', 'color:#fff;background:#ee6f57;padding:3px;border-radius:2px', 'color:#fff;background:#1f3c88;padding:3px;border-radius:2px', 'color:#fff;background:rgb(248, 147, 29);padding:3px;border-radius:2px', response)
-  nextPageToken = response.data.nextPageToken;
-  response.data.items.forEach(item => {
-    liked.push(item.id);
-  }
+  console.log(
+    "%cMyProject%cline:522%cresponse",
+    "color:#fff;background:#ee6f57;padding:3px;border-radius:2px",
+    "color:#fff;background:#1f3c88;padding:3px;border-radius:2px",
+    "color:#fff;background:rgb(248, 147, 29);padding:3px;border-radius:2px",
+    response
   );
+  nextPageToken = response.data.nextPageToken;
+  response.data.items.forEach((item) => {
+    liked.push(item.id);
+  });
 }
 
 async function setLiked(inputJSON) {
@@ -514,9 +526,7 @@ async function setLiked(inputJSON) {
       executablePath:
         "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
       headless: false,
-      args: [
-        "--profile-directory=Profile 8",
-      ]
+      args: ["--profile-directory=Profile 8"],
     });
     const page = await browser.newPage();
     await page.goto(inputJSON.url, {
@@ -675,28 +685,100 @@ async function exportLinks() {
   }
 }
 
-async function playVideo() {
-  let watched = {};
-  if (fs.existsSync("./watched.json")) {
-    const watchedData = fs.readFileSync("./watched.json", "utf-8");
-    watched =  JSON.parse(watchedData);
+function getAllVideos() {
+  if (fs.existsSync("./notliked.json")) {
+    return JSON.parse(fs.readFileSync("./notliked.json", "utf-8"));
   }
 
-  if (fs.existsSync('./notliked.json')) {
-    const notLiked = JSON.parse(fs.readFileSync('./notliked.json', 'utf-8'));
-    for (const item of notLiked) {
-      if (!watched[item.videoId]) {
-        watched[item.videoId] = true;
-        fs.writeFileSync('./watched.json', JSON.stringify(watched));
-        const url = item.url;
-        open(url);
-        return;
-      }
-    }
-
-  }
+  return {};
 }
 
+function getDuration(videos) {
+  const seconds = videos.reduce((a, v) => {
+    if (v.duration.split(":").length === 2) {
+      a += moment.duration(`0:${v.duration}`).asSeconds();
+    } else {
+      a += moment.duration(`0:${v.duration}`).asSeconds();
+    }
+    return a;
+  }, 0);
+
+  const duration = moment.duration(seconds, "seconds");
+  const wholeHours = Math.floor(duration.asHours());
+  const mins = Math.floor(duration.asMinutes()) - wholeHours * 60;
+
+  const hours = `${wholeHours}:${mins < 10 ? `0${mins}` : mins}`;
+  const days = moment.duration(seconds, "seconds").asDays().toFixed(1);
+
+  return { hours, days, count: videos.length };
+}
+
+async function playVideo() {
+  const watched = getWatched();
+  const allVideos = getAllVideos();
+  const availableVideos = allVideos.filter((video) => !watched[video.videoId]);
+  const availableStats = getDuration(availableVideos);
+  const nextVideo = availableVideos[0];
+  let title;
+  let description;
+
+  try {
+    title = nextVideo.title && new RTLArabic(nextVideo.title).convert();
+  } catch {}
+  try {
+    description =
+      nextVideo.description && new RTLArabic(nextVideo.description).convert();
+  } catch {}
+
+  const gitCommand = `git commit -am "تمت المشاهده مع الشكر https://github.com/hajonsoft/elephant.git ${nextVideo.videoId}" && git push`;
+  clipboardy.writeSync(gitCommand);
+  await beeper(2);
+  console.log(
+    chalk.bgHex("#4a148c").hex("#f3e5f5")(`.. ${gitCommand} .. `),
+    chalk.bgHex("#f3e5f5").hex("#4a148c")("  [Copied to clipboard]  ")
+  );
+
+  console.log(
+    chalk.bgHex("#4a148c").hex("#f3e5f5")(`Video: ${nextVideo.url}`),
+    chalk.bgHex("#f3e5f5").hex("#4a148c")(`Duration: ${nextVideo.duration}`)
+  );
+
+  console.log(
+    chalk.bgHex("#4a148c").hex("#f3e5f5")(`Title: ${title}`),
+    chalk.bgHex("#f3e5f5").hex("#4a148c")(
+      `${description ? "Description: " : ""}${description}`
+    )
+  );
+
+  console.log(
+    chalk.bgHex("#1b5e20").hex("#e8f5e9")(
+      `Available: ${availableStats.count} (${availableStats.hours} hours, ${availableStats.days} days)`
+    )
+  );
+  console.log(
+    chalk.bgHex("#1b5e20").hex("#e8f5e9")(
+      `Watched: ${Object.keys(watched).length}`
+    )
+  );
+
+  watched[nextVideo.videoId] = {
+    at: `${moment().format("YYYY-MM-DD hh:mm:ss a")}`,
+    url: nextVideo.url,
+    duration: nextVideo.duration,
+    title: nextVideo.title,
+  };
+  fs.writeFileSync("./watched.json", JSON.stringify(watched));
+  open(nextVideo.url);
+  process.exit();
+}
+
+function getWatched() {
+  if (fs.existsSync("./watched.json")) {
+    const watchedData = fs.readFileSync("./watched.json", "utf-8");
+    return JSON.parse(watchedData);
+  }
+  return {};
+}
 
 function convert_time(duration, inSeconds = false) {
   var a = duration.match(/\d+/g);
@@ -752,31 +834,12 @@ function convert_time(duration, inSeconds = false) {
 }
 
 async function main() {
+  if (!process.argv.includes("-i")) {
+    playVideo();
+    return ;
+  }
+
   await prepare();
-
-  // if (process.argv.includes("anthiago")) {
-  //   try {
-  //     transcribeWithAnthiago();
-  //   } catch (err) {
-  //     console.log(err);
-  //   }
-
-  //   return;
-  // }
-
-  // if (process.argv.includes("audio")) {
-  //     return downloadAudio();
-  // }
-  // if (process.argv.includes("text")) {
-  //     return transcribe();
-  // }
-  // if (process.argv.includes("clean")) {
-  //     clean();
-  // }
-  // if (process.argv.includes("export")) {
-  //     exportLinks();
-  // }
-
   const links = fs.readdirSync("./links")?.length;
   const remaining = links - fs.readdirSync("./text")?.length;
   const unsaved = remaining - fs.readdirSync("./db")?.length;
@@ -794,9 +857,11 @@ async function main() {
           `1-Get video links => ./links ${links} files`,
           `2-Display ${links} links duration sorted ASC`,
           `3-Display ${links} links duration sorted DESC`,
-          `4-Transcribe ${remaining > 0 ? remaining : "0"
+          `4-Transcribe ${
+            remaining > 0 ? remaining : "0"
           } remaining videos using anthiago (multi threaded [max=10])`,
-          `5-Save ${unsaved > 0 ? unsaved : "0"
+          `5-Save ${
+            unsaved > 0 ? unsaved : "0"
           } unsaved transcriptions to algolia`,
           `6- Add comment ${remainingComments} remaining `,
           `7- Play a video`,
@@ -829,7 +894,6 @@ async function main() {
       if (answers.action.startsWith("7-")) {
         return playVideo();
       }
-
     });
 }
 
